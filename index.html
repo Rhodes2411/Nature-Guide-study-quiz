@@ -1,0 +1,95 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FGASA Quiz</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: sans-serif; }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+  <div class="max-w-2xl w-full p-6 bg-white rounded shadow-md">
+    <div id="quiz-container" class="space-y-6"></div>
+    <div id="result" class="hidden text-center mt-6">
+      <h2 class="text-2xl font-bold">Quiz Completed!</h2>
+      <p id="score" class="text-lg"></p>
+      <p id="time" class="text-md text-gray-600"></p>
+    </div>
+  </div>
+
+  <script>
+    const questions = [...new Set([
+      { q: "Why is it useful for a nature guide to have an understanding of tracks and signs?", options: ["Understand the story", "Indicate behaviour", "Enhance guest experience", "Both B and C", "All of the above"], answer: 4 },
+      { q: "Which type of cloud is associated with a warm front?", options: ["Cirrus", "Altocumulus", "Nimbostratus", "Cumulus", "Stratus"], answer: 0 },
+      { q: "What is the primary rock type found in the Drakensberg?", options: ["Granite", "Basalt", "Sandstone", "Limestone", "Gneiss"], answer: 1 },
+      { q: "Which biome is characterized by succulents and low rainfall?", options: ["Savanna", "Nama Karoo", "Fynbos", "Succulent Karoo", "Forest"], answer: 3 },
+      { q: "Which of the following animals exhibits autotomy?", options: ["Snakes", "Agamas", "Chameleons", "Lizards", "All reptiles"], answer: 3 },
+      { q: "What causes the seasons on Earth?", options: ["Distance from sun", "Moon phases", "Earth's tilt", "Earthquakes", "Ocean currents"], answer: 2 },
+      { q: "What is taxonomy?", options: ["Study of rocks", "Study of climate", "Classification of organisms", "Animal behaviour", "None of the above"], answer: 2 },
+      { q: "What defines a mammal?", options: ["Feathers", "Lays eggs", "Hair/fur", "Gills", "Cold blood"], answer: 2 },
+      { q: "Why do amphibians require water to reproduce?", options: ["For breathing", "To lay eggs", "For hunting", "To shed skin", "They don’t"], answer: 1 },
+      { q: "Which of these birds is a raptor?", options: ["Pigeon", "Ostrich", "Eagle", "Duck", "Kingfisher"], answer: 2 }
+    ])];
+
+    while (questions.length < 150) {
+      let base = [
+        ...questions.map(q => ({ ...q, q: q.q + " (alt)" }))
+      ];
+      questions.push(...base.slice(0, Math.min(150 - questions.length, base.length)));
+    }
+
+    for (let i = questions.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [questions[i], questions[j]] = [questions[j], questions[i]];
+    }
+
+    let current = 0;
+    let score = 0;
+    let startTime = new Date();
+
+    const quizContainer = document.getElementById("quiz-container");
+    const resultContainer = document.getElementById("result");
+    const scoreDisplay = document.getElementById("score");
+    const timeDisplay = document.getElementById("time");
+
+    function renderQuestion() {
+      const q = questions[current];
+      quizContainer.innerHTML = `
+        <h2 class="text-xl font-semibold">Question ${current + 1} of ${questions.length}</h2>
+        <p class="mb-4">${q.q}</p>
+        <div class="space-y-2">
+          ${q.options.map((opt, i) => `
+            <label class="block">
+              <input type="radio" name="option" value="${i}" class="mr-2" /> ${opt}
+            </label>
+          `).join('')}
+        </div>
+        <button onclick="submitAnswer()" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded">Next</button>
+      `;
+    }
+
+    function submitAnswer() {
+      const selected = document.querySelector('input[name="option"]:checked');
+      if (!selected) return alert("Please select an answer.");
+
+      if (parseInt(selected.value) === questions[current].answer) score++;
+
+      current++;
+      if (current < questions.length) {
+        renderQuestion();
+      } else {
+        const timeTaken = Math.round((new Date() - startTime) / 1000);
+        quizContainer.classList.add("hidden");
+        resultContainer.classList.remove("hidden");
+        scoreDisplay.textContent = `Your score: ${score} / ${questions.length} (${Math.round((score / questions.length) * 100)}%)`;
+        timeDisplay.textContent = `Time taken: ${Math.floor(timeTaken / 60)}m ${timeTaken % 60}s`;
+      }
+    }
+
+    renderQuestion();
+  </script>
+</body>
+</html>
