@@ -1,0 +1,89 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FGASA Quiz - Advanced</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: sans-serif; }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+  <div class="max-w-4xl w-full p-6 bg-white rounded shadow-md">
+    <div id="quiz-container" class="space-y-6"></div>
+    <div id="result" class="hidden text-center mt-6">
+      <h2 class="text-2xl font-bold">Quiz Completed!</h2>
+      <p id="score" class="text-lg"></p>
+      <p id="time" class="text-md text-gray-600"></p>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      { q: "What is the term for animals active at dawn and dusk?", options: ["Nocturnal", "Diurnal", "Crepuscular", "Cathemeral", "Matutinal"], answer: 2 },
+      { q: "Which mineral is most abundant in the Earth's crust?", options: ["Quartz", "Feldspar", "Mica", "Calcite", "Olivine"], answer: 1 },
+      { q: "What triggers the migration of birds in Southern Africa?", options: ["Temperature only", "Photoperiod and resource availability", "Rainfall alone", "Magnetic fields", "Predation"], answer: 1 },
+      { q: "Which is NOT a primary factor influencing biomes?", options: ["Rainfall", "Temperature", "Soil pH", "Altitude", "Sunlight"], answer: 2 },
+      { q: "Which invertebrate has a segmented body and jointed limbs?", options: ["Earthworm", "Jellyfish", "Arthropod", "Mollusk", "Flatworm"], answer: 2 },
+      { q: "Why are wetlands important for conservation?", options: ["Flood control", "Water purification", "Habitat diversity", "All of the above", "None"], answer: 3 },
+      { q: "In which phase is the moon completely dark?", options: ["Full moon", "New moon", "Waning gibbous", "First quarter", "Waxing crescent"], answer: 1 },
+      { q: "Which behavior is most associated with primates?", options: ["Mimicry", "Tool use", "Autotomy", "Migration", "Echolocation"], answer: 1 },
+      { q: "What do reptiles use to regulate their body temperature?", options: ["Metabolism", "Behavioral thermoregulation", "Sweating", "Insulation", "Panting"], answer: 1 },
+      { q: "How is a biome primarily defined?", options: ["Animal types", "Climate and vegetation", "Soil types", "Human influence", "Altitude"], answer: 1 }
+    ];
+    while (questions.length < 150) {
+      const uniqueCopy = questions.slice(0, 150 - questions.length).map(q => ({ ...q }));
+      questions.push(...uniqueCopy);
+    }
+    for (let i = questions.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [questions[i], questions[j]] = [questions[j], questions[i]];
+    }
+    let current = 0;
+    let score = 0;
+    let startTime = new Date();
+    const quizContainer = document.getElementById("quiz-container");
+    const resultContainer = document.getElementById("result");
+    const scoreDisplay = document.getElementById("score");
+    const timeDisplay = document.getElementById("time");
+    function renderBatch() {
+      quizContainer.innerHTML = `<h2 class="text-xl font-semibold mb-4">Questions ${current + 1} to ${Math.min(current + 10, questions.length)} of ${questions.length}</h2>`;
+      for (let i = current; i < current + 10 && i < questions.length; i++) {
+        const q = questions[i];
+        quizContainer.innerHTML += `
+          <div class="mb-6">
+            <p class="font-medium">${i + 1}. ${q.q}</p>
+            <div class="space-y-2">
+              ${q.options.map((opt, idx) => `
+                <label class="block">
+                  <input type="radio" name="question-${i}" value="${idx}" class="mr-2" /> ${opt}
+                </label>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+      quizContainer.innerHTML += `<button onclick="submitBatch()" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded">Next</button>`;
+    }
+    function submitBatch() {
+      for (let i = current; i < current + 10 && i < questions.length; i++) {
+        const selected = document.querySelector(`input[name="question-${i}"]:checked`);
+        if (selected && parseInt(selected.value) === questions[i].answer) score++;
+      }
+      current += 10;
+      if (current < questions.length) {
+        renderBatch();
+      } else {
+        const timeTaken = Math.round((new Date() - startTime) / 1000);
+        quizContainer.classList.add("hidden");
+        resultContainer.classList.remove("hidden");
+        scoreDisplay.textContent = `Your score: ${score} / ${questions.length} (${Math.round((score / questions.length) * 100)}%)`;
+        timeDisplay.textContent = `Time taken: ${Math.floor(timeTaken / 60)}m ${timeTaken % 60}s`;
+      }
+    }
+    renderBatch();
+  </script>
+</body>
+</html>
